@@ -1,0 +1,12 @@
+html,
+body {
+  box-sizing: border-box;
+  font-family: "Rubik Pixels";
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 60px;
+}
