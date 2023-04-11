@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function App() {
   const [name, setName] = useState("");
   const [todo, setTodo] = useState(
-    () => JSON.parse(localStorage.getItem("sk")) || []
+    () => JSON.parse(localStorage.getItem("todo")) || []
   );
   const [isEditing, setIsEditing] = useState(false);
   const [editingIndex, setEditingIndex] = useState(0);
 
+  const inputRef = useRef();
+
   useEffect(() => {
-    localStorage.setItem("sk", JSON.stringify(todo));
+    localStorage.setItem("todo", JSON.stringify(todo));
   }, [todo]);
 
   function handleChange(e) {
@@ -19,44 +21,50 @@ export default function App() {
   function handleSubmit(e) {
     e.preventDefault();
     isEditing
-      ? setTodo((prev) =>
-          prev.map((itm, i) => (i === editingIndex ? name : itm))
+      ? setTodo((prevTodo) =>
+          prevTodo.map((item, i) => (i === editingIndex ? name : item))
         )
-      : name && setTodo((prevVal) => [...prevVal, name]);
+      : setTodo((prevTodo) => [...prevTodo, name]);
     setName("");
     setIsEditing(false);
   }
 
-  function handleEdit(item, ind) {
-    setIsEditing(true);
-    setName(item);
-    setTodo((prev) => prev.map((itm, i) => (i === ind ? "" : itm)));
-    setEditingIndex(ind);
+  function handleDelete(ind) {
+    setTodo((prevTodo) => prevTodo.filter((itm, i) => i !== ind && itm));
   }
 
-  function handleDelete(item, ind) {
-    setTodo((prev) => prev.filter((itm, i) => i !== ind && itm));
+  function handleEdit(item, i) {
+    setName(item);
+    setIsEditing(true);
+    setEditingIndex(i);
+    inputRef.current.focus();
   }
 
   return (
-    <div className="container">
+    <div>
       <form onSubmit={handleSubmit}>
         <input
+          ref={inputRef}
+          type="text"
           value={name}
-          placeholder="Enter name here..."
+          placeholder="input"
           onChange={handleChange}
         />
-        <button>submit</button>
+        <button>Submit</button>
       </form>
       <ul>
-        {todo.map((item, ind) => (
-          <li
-            key={ind}
-            // onClick={() => handleDelete(item, ind)}
-            onDoubleClick={(e) => handleEdit(item, ind)}
-          >
-            {/*  */}
-            {item}
+        {todo.map((item, i) => (
+          <li key={i}>
+            <span
+              style={{ cursor: "pointer" }}
+              onDoubleClick={() => handleEdit(item, i)}
+            >
+              {item}
+            </span>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span style={{ cursor: "pointer" }} onClick={() => handleDelete(i)}>
+              ×
+            </span>
           </li>
         ))}
       </ul>
